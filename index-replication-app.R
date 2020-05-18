@@ -1,6 +1,9 @@
 library(shiny)
 library(ggplot2)
+library(lubridate)
+library(stringr)
 
+source("helpers.R")
 
 
 ui <- navbarPage("Index replication",
@@ -10,7 +13,8 @@ ui <- navbarPage("Index replication",
                           sidebarLayout(
                             sidebarPanel(
                               actionButton("go", "Go"),
-                              numericInput("n", "n", 50)),
+                              textInput("symbols", h3("Symbols"), value = "AAPL, MSFT"),
+                              dateRangeInput("dates", h3("Date range"), start = today() - dyears(15))),
                             mainPanel(plotOutput("simulation"))
                           )
                           )
@@ -19,11 +23,20 @@ ui <- navbarPage("Index replication",
 
 server <- function(input, output){
   
-  data <- eventReactive(input$go, {
-    data.frame(x = 1:input$n, y = rnorm(input$n ,0,1))
+  dataDownload <- reactive({
+    symbols <- unlist(str_split(input$symbols, ", *"))
+    get_symbols(symbols, from = input$dates[1], to = input$dates[2])
   })
   
-  output$simulation <- renderPlot({ggplot(data(), aes(x=x, y=y)) + geom_point()})
+  
+  buttonClick <- eventReactive(input$go, {
+    dataDownload()
+  })
+  
+  output$simulation <- renderPlot({
+    ggplot(buttonClick(), aes(x=date, y=price, color=symbol)) + 
+      geom_line()
+    })
 }
 
 
