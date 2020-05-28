@@ -1,0 +1,34 @@
+
+h4 {
+  font-weight: 700;
+}
+
+body {
+  background-color: #fff;
+}
+
+
+.settings  {
+  background-color: #b5cdff;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 5px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+}
+
+.settings:hover {
+  border: 3px solid #91a4ff;
+}
+
+.well {
+  padding: 10px;
+}
+
+
+
+.btn {
+  background-color: #0e2f44;
+  color: #f6f3ee;
+  font-weight: 700;
+  width: 100%;
+}
