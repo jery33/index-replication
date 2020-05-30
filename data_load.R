@@ -16,7 +16,13 @@ query_data <- function(index, from, to){
 
 
 process_data <- function(data){
+  bad_symbols <- data %>% 
+    filter(price <= 0) %>% 
+    .$symbol %>% 
+    unique()
+  
   data %>% 
+    filter(!(symbol %in% bad_symbols)) %>% 
     select(date, price, symbol) %>%  
     spread(key=symbol, value=price) %>% 
     fill() %>% 
