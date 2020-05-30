@@ -9,11 +9,6 @@ source("pca_stock_selection.R")
 source("lasso_stock_selection.R")
 
 
-if(!file.exists("data/prices-db.sqlite")){
-  source("fill_database.R")
-}
-
-
 server <- function(input, output, session){
   
   getData <- reactive({
