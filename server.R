@@ -43,6 +43,10 @@ server <- function(input, output, session){
     buttonClick()  %>% 
       gather("type", "return", -date) %>% 
       ggplot() +
-      geom_line(aes(x=as.Date(date), y=return, color=type))
+      geom_line(aes(x=as.Date(date), y=return, color=type), size = 1) +
+      labs(title = paste("Replication of", input$index, "index"),
+           subtitle = paste(input$dates[1], "-", input$dates[2]),
+           x = "Date",
+           y = "Cumulative return")
   })
 }
