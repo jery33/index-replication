@@ -51,7 +51,8 @@ server <- function(input, output, session){
       scale_color_manual(labels = c( "Lasso", "PCA", input$index), 
                          breaks = c("lasso", "pca" , "index"),
                          values=setNames(c("#340BDB", "#478F00", "#DB0300"), c("lasso", "pca", "index"))) +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1))
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      scale_x_date(date_breaks = "years" , date_labels = "%y")
   })
   
   
@@ -64,7 +65,8 @@ server <- function(input, output, session){
            y = "Number of stocks")  +
       scale_color_manual(labels = c( "Lasso", "PCA"),
                          breaks = c("lasso_n_stocks", "pca_n_stocks"),
-                         values=setNames(c("#340BDB", "#478F00"), c("lasso_n_stocks", "pca_n_stocks")))
-
+                         values=setNames(c("#340BDB", "#478F00"), c("lasso_n_stocks", "pca_n_stocks"))) +
+      ylim(0, NA) +
+      scale_x_date(date_breaks = "years" , date_labels = "%y")
   })
 }

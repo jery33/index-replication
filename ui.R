@@ -5,6 +5,15 @@ library(shinycssloaders)
 ui <- navbarPage("Index replication",
                  tabPanel("About", 
                           h2("Introduction"),
+                          p("This app allows interactive experimentation with methods from ", 
+                            em("'Replicating DAX indicies with Principal Component Analysis'"), 
+                            " (2020) M. Andrzejewski, J. Bednarski, J. Cudak"),
+                          strong("Key research questions: "),
+                          tags$ul(
+                            tags$li(strong("How many stocks does it take to create a diversified portfolio?")),
+                            tags$ul(tags$li("How many stocks does it take to create a diversified portfolio?")),
+                            tags$li(strong("How can we identify which stocks to hold?")),
+                            tags$ul(tags$li("Search for risk factors underlying stocks' behaviour"))),
                           h2("PCA stock selection"),
                           p("PCA stock selection procedure is based on method from Yang, Rea and Rea's 2015 study",
                             em("'Stock Selection with Principal Component Analysis'"), " and works as follows:"),
@@ -26,8 +35,6 @@ ui <- navbarPage("Index replication",
                             tags$li("Stocks with non-zero coefficients are selected stocks.")
                           )
                           ),
-                  
-                 
                  tabPanel("Simulation",
                           sidebarLayout(
                             sidebarPanel(
@@ -50,7 +57,7 @@ ui <- navbarPage("Index replication",
                                 conditionalPanel("input.lasso_show",
                                   sliderInput("est_window_lasso", "Estimation window", min = 2*252, max= 5*252, value = 2*252),
                                   sliderInput("est_frequency_lasso", "Estimation frequency", min = 21, max= 12*21, value = 3*21),
-                                  sliderInput("lambda", "Lambda", min=0.001,max=0.01, value=0.005)), 
+                                  sliderInput("lambda", "Lambda", min=0.0,max=0.99, value=0.99)), 
                                 class="lasso settings"),
                               actionButton("go", "Go")),
                             mainPanel(withSpinner(plotOutput("cum_return"), type=5),

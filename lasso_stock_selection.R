@@ -5,7 +5,7 @@ lasso_stock_selection <- function(returns, lambda){
   x <- returns %>% as.matrix()
   y <- rowMeans(returns) %>% as.matrix()
   lasso_fit <- glmnet(x, y, intercept = F)
-  
+  lambda <- max(lasso_fit$lambda) * lambda
   coefficients <- coef(lasso_fit, s = lambda)
   selected_stocks <- coefficients@Dimnames[[1]][coefficients@i + 1]
   n_stocks <- length(selected_stocks)
