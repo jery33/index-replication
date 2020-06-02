@@ -7,6 +7,9 @@ body {
   background-color: #fff;
 }
 
+div[data-value="About"]{
+   max-width: 800px;
+}
 
 .settings  {
   background-color: #b5cdff;
@@ -23,8 +26,6 @@ body {
 .well {
   padding: 10px;
 }
-
-
 
 .btn {
   background-color: #0e2f44;

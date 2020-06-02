@@ -19,6 +19,7 @@ est_end_eval_lasso <- function(data, windows, window_id, lambda){
   test_data <- get_test_data(data, windows, window_id)
   train_result <- lasso_stock_selection(est_data, lambda)
   test_result <- get_test_result(test_data, train_result$selected_stocks)
+  test_result["lasso_n_stocks"] <- train_result$n_stocks
   test_result
 }  
 
@@ -31,6 +32,6 @@ run_backtest_lasso <- function(data, lambda, est_window, est_frequency){
     map(function(x) est_end_eval_lasso(data, windows, x, lambda)) %>% 
     bind_rows() %>% 
     arrange(date) %>% 
-    mutate_at(vars(-date), function(x) cumprod(1+x)) %>% 
-    set_names(c("date", "lasso", "index"))
+    mutate_at(vars(method_return, index_return), function(x) cumprod(1+x)) %>% 
+    set_names(c("date", "lasso", "index", "lasso_n_stocks"))
 }

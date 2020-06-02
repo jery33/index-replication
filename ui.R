@@ -1,14 +1,32 @@
 library(shiny)
 library(lubridate)
+library(shinycssloaders)
 
 ui <- navbarPage("Index replication",
                  tabPanel("About", 
-                          p("This tab will contain method's description"),
-                          h1("Introduction"),
-                          h2("PCA Stock selection"),
-                          withMathJax("\\(\\Sigma\\)"),
-                          h3("Lasso Stock selection"),
-                          p("\\(\\lambda\\)")),
+                          h2("Introduction"),
+                          h2("PCA stock selection"),
+                          p("PCA stock selection procedure is based on method from Yang, Rea and Rea's 2015 study",
+                            em("'Stock Selection with Principal Component Analysis'"), " and works as follows:"),
+                          tags$ol(
+                            tags$li("Apply PCA to the correlation matrix ", withMathJax("\\(\\Sigma\\)"), " of a stock market."),
+                            tags$li("Associate one stock with the highest coefficient in absolute value with each
+                                     of the last m principal components that have eigenvalues less than a certain
+                                     level, d, which is called the ", strong("deletion criterion"), " then delete those m stocks."),
+                            tags$li("The procedure is repeated until the eigenvalue of the last principal component 
+                                    is not less than level, s, which is called the", strong("stoppping criterion."))
+                          ),
+                          h3("Lasso stock selection"),
+                          p("Lasso stock selection procedure takes advantage of the fact that LASSO regression tends to produce sparse solutions and works as follows:"),
+                          tags$ol(
+                            tags$li("Estimate \\(\\beta\\) of linear model by minimising: 
+                                    $$\\frac{1}{N} \\left\\lVert R_{index} - R \\beta \\right\\rVert^{2}_{2} + \\lambda \\left\\lVert \\beta \\right\\rVert_{1} $$ 
+                                    where \\(R_{index}\\) is vector of index's returns, \\(R\\) is the matrix of individual stocks' returns 
+                                    and \\(\\lambda\\) is regularization parameter which affects number of selected stocks."),
+                            tags$li("Stocks with non-zero coefficients are selected stocks.")
+                          )
+                          ),
+                  
                  
                  tabPanel("Simulation",
                           sidebarLayout(
@@ -20,7 +38,7 @@ ui <- navbarPage("Index replication",
                                 dateRangeInput("dates", "Date range", start = as_date("2020-03-31") - dyears(15), end = as_date("2020-03-31")), 
                                 class="general settings"),
                               div(
-                                checkboxInput("pca_show", h4("PCA stock selection settings"), F),
+                                checkboxInput("pca_show", h4("PCA settings"), F),
                                 conditionalPanel("input.pca_show",
                                   sliderInput("est_window_pca", "Estimation window", min = 2*252, max= 5*252, value = 2*252),
                                   sliderInput("est_frequency_pca", "Estimation frequency", min = 21, max= 12*21, value = 3*21),
@@ -28,14 +46,15 @@ ui <- navbarPage("Index replication",
                                   sliderInput("del_crit", "Deletion Criterion", min=0.7,max=1.2, value=1.)), 
                                 class="pca settings"),
                               div(
-                                checkboxInput("lasso_show", h4("Lasso stock selection settings"), F),
+                                checkboxInput("lasso_show", h4("Lasso settings"), F),
                                 conditionalPanel("input.lasso_show",
                                   sliderInput("est_window_lasso", "Estimation window", min = 2*252, max= 5*252, value = 2*252),
                                   sliderInput("est_frequency_lasso", "Estimation frequency", min = 21, max= 12*21, value = 3*21),
                                   sliderInput("lambda", "Lambda", min=0.001,max=0.01, value=0.005)), 
                                 class="lasso settings"),
                               actionButton("go", "Go")),
-                            mainPanel(plotOutput("simulation"))
+                            mainPanel(withSpinner(plotOutput("cum_return"), type=5),
+                                      withSpinner(plotOutput("n_stocks"), type=5))
                           )
                  )
 )
