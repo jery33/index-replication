@@ -61,7 +61,8 @@ ui <- navbarPage("Index replication",
                                 class="lasso settings"),
                               actionButton("go", "Go")),
                             mainPanel(withSpinner(plotOutput("cum_return"), type=5),
-                                      withSpinner(plotOutput("n_stocks"), type=5))
+                                      withSpinner(plotOutput("n_stocks"), type=5),
+                                      withSpinner(tableOutput("stats"), type=5))
                           )
                  )
 )

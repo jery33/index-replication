@@ -39,7 +39,39 @@ server <- function(input, output, session){
     getResults()
   })
   
+
+  output$stats <- renderTable({
+    
+    returns <- buttonClick() %>% 
+      select(pca , lasso, index) %>% 
+      mutate_all(simple_return) %>% 
+      drop_na() 
+    
+    performance <- returns %>% 
+      select(pca, lasso, index) %>% 
+      gather(key="type",value="return", pca, lasso, index) %>% 
+      group_by(type) %>% 
+      summarise(`Return (Annualized)` = mean(return)*252, `Volatility (Annualized)`= sd(return)*252^0.5) %>% 
+      select(-type)
+    
+    tracking <- returns %>% 
+      mutate(pca_diff = pca - index, lasso_diff = lasso - index) %>% 
+      select(pca_diff, lasso_diff) %>% 
+      gather(key="type",value="return", pca_diff, lasso_diff) %>% 
+      group_by(type) %>% 
+      summarise(`Mean Benchmark Difference  (Annualized)` = mean(return)*252, `Tracking Error (Annualized)`= sd(return)*252^0.5) %>% 
+      select(-type) %>% 
+      rbind(c(0, 0))
+    
+    table_results <-  (bind_cols(tibble(Method=c("Lasso","PCA","Index")),performance, tracking))
+    table_results
+  })
+  
+  
+  
   output$cum_return <- renderPlot({
+
+    
     buttonClick()  %>% 
       gather("type", "return", pca, lasso, index) %>% 
       ggplot() +
