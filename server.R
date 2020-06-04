@@ -2,6 +2,8 @@ library(shiny)
 library(ggplot2)
 library(lubridate)
 library(stringr)
+library(dygraphs)
+library(xts)
 
 source("helpers.R")
 source("data_load.R")
@@ -67,38 +69,56 @@ server <- function(input, output, session){
     table_results
   })
   
-  
-  
-  output$cum_return <- renderPlot({
 
+  output$cum_return <- renderDygraph({
+    data <- buttonClick() %>% 
+      drop_na() %>% 
+      select(pca, lasso, index) %>% 
+      mutate_all(function(x) x-1)%>% 
+      as.data.frame()
     
-    buttonClick()  %>% 
-      gather("type", "return", pca, lasso, index) %>% 
-      ggplot() +
-      geom_line(aes(x=as.Date(date), y=return-1, color=type), size = 1) +
-      labs(title = paste("Replication of", input$index, "index"),
-           subtitle = paste(input$dates[1], "–", input$dates[2]),
-           x = "Date",
-           y = "Cumulative return") +
-      scale_color_manual(labels = c( "Lasso", "PCA", input$index), 
-                         breaks = c("lasso", "pca" , "index"),
-                         values=setNames(c("#340BDB", "#478F00", "#DB0300"), c("lasso", "pca", "index"))) +
-      scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-      scale_x_date(date_breaks = "years" , date_labels = "%y")
-  })
+    date <-  buttonClick() %>% 
+      drop_na( ) %>% 
+      .$date %>% 
+      as.Date()
   
-  
-  output$n_stocks <- renderPlot({
-    buttonClick()  %>%
-      gather("type", "n_stocks", pca_n_stocks, lasso_n_stocks) %>%
-      ggplot() +
-      geom_line(aes(x=as.Date(date), y=n_stocks, color=type), size = 1) +
-      labs(x = "Date",
-           y = "Number of stocks")  +
-      scale_color_manual(labels = c( "Lasso", "PCA"),
-                         breaks = c("lasso_n_stocks", "pca_n_stocks"),
-                         values=setNames(c("#340BDB", "#478F00"), c("lasso_n_stocks", "pca_n_stocks"))) +
-      ylim(0, NA) +
-      scale_x_date(date_breaks = "years" , date_labels = "%y")
+    
+    (xts(data, order.by = date)) %>% 
+      dygraph(main=paste("Replication of", input$index, "index"),
+              group = "dygraphs",
+              ylab = "Cumulative return",
+              xlab = "Date") %>% 
+      dyAxis("y",
+             valueFormatter = "function(v){return (v*100).toFixed(1) + '%'}",
+             axisLabelFormatter = "function(v){return (v*100).toFixed(0) + '%'}") %>% 
+      dySeries("pca", label ="PCA", color="#478F00") %>% 
+      dySeries("lasso", label ="Lasso",  color="#340BDB") %>% 
+      dySeries("index", label ="Index", color="#DB0300") 
   })
+
+
+
+
+  output$n_stocks <- renderDygraph({
+    data <- buttonClick() %>%
+      drop_na() %>%
+      select(pca_n_stocks, lasso_n_stocks) %>%
+      as.data.frame()
+
+    date <-  buttonClick() %>%
+      drop_na( ) %>%
+      .$date %>%
+      as.Date()
+
+    (xts(data, order.by = date)) %>%
+      dygraph(ylab = "Number of stocks",
+              xlab = "Date",
+              group = "dygraphs") %>%
+      dySeries("pca_n_stocks", label = "PCA") %>% 
+      dySeries("lasso_n_stocks", label ="Lasso") %>% 
+      dyOptions(stepPlot = TRUE) %>% 
+      dyRangeSelector()
+  })
+
+  
 }

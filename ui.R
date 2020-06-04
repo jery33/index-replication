@@ -60,8 +60,8 @@ ui <- navbarPage("Index replication",
                                   sliderInput("lambda", "Lambda", min=0.0,max=0.99, value=0.99)), 
                                 class="lasso settings"),
                               actionButton("go", "Go")),
-                            mainPanel(withSpinner(plotOutput("cum_return"), type=5),
-                                      withSpinner(plotOutput("n_stocks"), type=5),
+                            mainPanel(withSpinner(dygraphOutput("cum_return"), type=5),
+                                      withSpinner(dygraphOutput("n_stocks"), type=5),
                                       withSpinner(tableOutput("stats"), type=5))
                           )
                  )
