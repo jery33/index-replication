@@ -61,6 +61,7 @@ ui <- navbarPage("Index replication",
                                 class="lasso settings"),
                               actionButton("go", "Go")),
                             mainPanel(withSpinner(dygraphOutput("cum_return"), type=5),
+                                      withSpinner(dygraphOutput("tracking_error"), type=5),
                                       withSpinner(dygraphOutput("n_stocks"), type=5),
                                       withSpinner(tableOutput("stats"), type=5))
                           )
