@@ -1,17 +1,19 @@
-library(RSQLite)
-library(DBI)
 library(glue)
 library(dplyr)
 library(tidyr)
 library(purrr)
+library(readr)
 
 
-query_data <- function(index, from, to){
-  query <-  glue("SELECT * FROM stock_prices WHERE [index] = '{index}' AND [date] > '{from}' AND [date] < '{to}'")
-  mydb <- dbConnect(RSQLite::SQLite(), "data/prices-db.sqlite")
-  data <- dbGetQuery(mydb, query)
-  dbDisconnect(mydb)
-  as_tibble(data)
+load_data <- function(){
+  read_csv("data/prices.csv")
+}
+
+
+query_data <- function(data, index, from, to){
+  data %>% 
+    filter(index == index, date > from, date < to) %>% 
+    as.data.frame()
 }
 
 

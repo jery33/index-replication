@@ -1,5 +1,3 @@
-library(DBI)
-library(RSQLite)
 library(quantmod)
 library(rvest)
 library(xml2)
@@ -34,6 +32,5 @@ spx_data['date'] <- format(spx_data[['date']])
 spx_data['index'] <- 'SPX'
 
 data <- bind_rows(list(dax_data, spx_data))
-mydb <- dbConnect(RSQLite::SQLite(), "data/prices-db.sqlite")
-dbWriteTable(mydb, "stock_prices", data)
-dbDisconnect(mydb)
+
+write_csv(data, "data/prices.csv")

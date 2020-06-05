@@ -10,11 +10,13 @@ source("data_load.R")
 source("pca_stock_selection.R")
 source("lasso_stock_selection.R")
 
+global_data <- load_data()
+
 
 server <- function(input, output, session){
   
   getData <- reactive({
-    data <- query_data(input$index, input$dates[1], input$dates[2])
+    data <- query_data(global_data, input$index, input$dates[1], input$dates[2])
     data <- process_data(data)
     data
   })

@@ -1,6 +1,7 @@
 library(shiny)
 library(lubridate)
 library(shinycssloaders)
+library(dygraphs)
 
 ui <- navbarPage("Index replication",
                  tabPanel("About", 
