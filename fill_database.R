@@ -35,7 +35,7 @@ spx_data['index'] <- 'SPX'
 data <- bind_rows(list(dax_data, spx_data))
 
 try({
-  write_csv(data, "data/prices.csv")
+  write.csv(data, "data/prices.csv", row.names = F)
 })
 
 s3save(data, bucket ='index-replication', object = "prices.csv")

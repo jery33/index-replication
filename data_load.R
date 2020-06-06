@@ -2,7 +2,6 @@ library(glue)
 library(dplyr)
 library(tidyr)
 library(purrr)
-library(readr)
 library(aws.s3)
 
 
@@ -30,7 +29,7 @@ read_aws_credentials <- function(){
 load_data <- function(){
   local_path <- "data/prices.csv"
   if(file.exists(local_path)){
-    read_csv(local_path)
+    read.csv(local_path, stringsAsFactors = F)
   } else{
     read_aws_credentials()
     e <- new.env()
