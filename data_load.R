@@ -3,17 +3,46 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(readr)
+library(aws.s3)
 
 
-load_data <- function(){
-  read_csv("data/prices.csv")
+
+
+read_aws_credentials <- function(){
+  con <- file("~/.aws/credentials", "r")
+  while(TRUE){
+    line <- readLines(con, n=1L)
+    if ( length(line) == 0 ) {
+      break
+    }
+    if(grepl("=",line, fixed=T)){
+      key_value = unlist(strsplit(line, "="))
+      args = list(key_value[2])
+      names(args) = toupper(key_value[1])
+      do.call(Sys.setenv, args)
+    }
+  }
+  close(con)
 }
 
 
-query_data <- function(data, index, from, to){
+
+load_data <- function(){
+  local_path <- "data/prices.csv"
+  if(file.exists(local_path)){
+    read_csv(local_path)
+  } else{
+    read_aws_credentials()
+    e <- new.env()
+    s3load("prices.csv", bucket = "index-replication", envir=e)
+    e$prices
+  }
+}
+
+
+query_data <- function(data, index_, from, to){
   data %>% 
-    filter(index == index, date > from, date < to) %>% 
-    as.data.frame()
+    filter(index == index_, date > from, date < to) 
 }
 
 

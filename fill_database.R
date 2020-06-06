@@ -2,6 +2,7 @@ library(quantmod)
 library(rvest)
 library(xml2)
 library(magrittr)
+library(aws.s3)
 
 source("helpers.R")
 
@@ -33,4 +34,8 @@ spx_data['index'] <- 'SPX'
 
 data <- bind_rows(list(dax_data, spx_data))
 
-write_csv(data, "data/prices.csv")
+try({
+  write_csv(data, "data/prices.csv")
+})
+
+s3save(data, bucket ='index-replication', object = "prices.csv")

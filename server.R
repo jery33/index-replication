@@ -94,10 +94,6 @@ server <- function(input, output, session){
       .$date %>% 
       as.Date()
   
-    xts(data2, order.by = date) %>% 
-      head() %>% 
-      print()
-    
     (xts(data, order.by = date)) %>% 
       dygraph(main=paste("Replication of", input$index, "index"),
               group = "dygraphs",
