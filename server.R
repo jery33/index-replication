@@ -10,11 +10,13 @@ source("data_load.R")
 source("pca_stock_selection.R")
 source("lasso_stock_selection.R")
 
+global_data <- load_data()
+
 
 server <- function(input, output, session){
   
   getData <- reactive({
-    data <- query_data(input$index, input$dates[1], input$dates[2])
+    data <- query_data(global_data, input$index, input$dates[1], input$dates[2])
     data <- process_data(data)
     data
   })
@@ -71,6 +73,16 @@ server <- function(input, output, session){
   
 
   output$cum_return <- renderDygraph({
+    
+    data2 <- buttonClick() %>% 
+      drop_na() %>% 
+      select(pca, lasso, index) %>% 
+      mutate_all(function(x) x/lag(x)-1)%>% 
+      as.data.frame() %>% 
+      mutate(pca_error = pca - index, lasso_error = lasso - index) %>% 
+      select(pca_error, lasso_error)
+    
+
     data <- buttonClick() %>% 
       drop_na() %>% 
       select(pca, lasso, index) %>% 
@@ -82,7 +94,6 @@ server <- function(input, output, session){
       .$date %>% 
       as.Date()
   
-    
     (xts(data, order.by = date)) %>% 
       dygraph(main=paste("Replication of", input$index, "index"),
               group = "dygraphs",
@@ -97,6 +108,26 @@ server <- function(input, output, session){
   })
 
 
+  output$tracking_error <- renderDygraph({
+    data2 <- buttonClick() %>% 
+      drop_na() %>% 
+      select(pca, lasso, index) %>% 
+      mutate_all(function(x) x/lag(x)-1)%>% 
+      as.data.frame() %>% 
+      mutate(pca_error = pca - index, lasso_error = lasso - index) %>% 
+      select(pca_error, lasso_error)
+    
+    date <-  buttonClick() %>% 
+      drop_na( ) %>% 
+      .$date %>% 
+      as.Date()
+    
+    xts(data2, order.by = date) %>% 
+      rollapplyr(width=63, FUN=sd, fill = NA) %>% 
+      dygraph(group = "dygraphs",
+              ylab = "Tracking error",
+              xlab = "Date")
+  })
 
 
   output$n_stocks <- renderDygraph({

@@ -1,9 +1,8 @@
-library(DBI)
-library(RSQLite)
 library(quantmod)
 library(rvest)
 library(xml2)
 library(magrittr)
+library(aws.s3)
 
 source("helpers.R")
 
@@ -34,6 +33,9 @@ spx_data['date'] <- format(spx_data[['date']])
 spx_data['index'] <- 'SPX'
 
 data <- bind_rows(list(dax_data, spx_data))
-mydb <- dbConnect(RSQLite::SQLite(), "data/prices-db.sqlite")
-dbWriteTable(mydb, "stock_prices", data)
-dbDisconnect(mydb)
+
+try({
+  write.csv(data, "data/prices.csv", row.names = F)
+})
+
+s3save(data, bucket ='index-replication', object = "prices.csv")

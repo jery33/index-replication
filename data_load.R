@@ -1,17 +1,47 @@
-library(RSQLite)
-library(DBI)
 library(glue)
 library(dplyr)
 library(tidyr)
 library(purrr)
+library(aws.s3)
 
 
-query_data <- function(index, from, to){
-  query <-  glue("SELECT * FROM stock_prices WHERE [index] = '{index}' AND [date] > '{from}' AND [date] < '{to}'")
-  mydb <- dbConnect(RSQLite::SQLite(), "data/prices-db.sqlite")
-  data <- dbGetQuery(mydb, query)
-  dbDisconnect(mydb)
-  as_tibble(data)
+
+
+read_aws_credentials <- function(){
+  con <- file("~/.aws/credentials", "r")
+  while(TRUE){
+    line <- readLines(con, n=1L)
+    if ( length(line) == 0 ) {
+      break
+    }
+    if(grepl("=",line, fixed=T)){
+      key_value = unlist(strsplit(line, "="))
+      args = list(key_value[2])
+      names(args) = toupper(key_value[1])
+      do.call(Sys.setenv, args)
+    }
+  }
+  close(con)
+}
+
+
+
+load_data <- function(){
+  local_path <- "data/prices.csv"
+  if(file.exists(local_path)){
+    read.csv(local_path, stringsAsFactors = F)
+  } else{
+    read_aws_credentials()
+    e <- new.env()
+    s3load("prices.csv", bucket = "index-replication", envir=e)
+    e$prices
+  }
+}
+
+
+query_data <- function(data, index_, from, to){
+  data %>% 
+    filter(index == index_, date > from, date < to) 
 }
 
 
